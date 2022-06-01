@@ -67,10 +67,11 @@ def read_air_quality_station():
 def read_CO2():
     #2014 to 2018 data
     df=pd.read_csv('datasets/ghg-emissions-transport.csv')
+    return df
 
 if __name__ == "__main__":
 
     velo1=read_data_velo_feu()
     velo2=read_data_velo_piste()
-    vehicule1=read_number_vehicules()
+    vehicle1=read_number_vehicles()
 
