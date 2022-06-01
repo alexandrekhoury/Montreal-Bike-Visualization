@@ -16,9 +16,6 @@ def read_data_velo_feu():
     #set(df1['Description_Code_Banque'])
     return pd.concat([df1,df2,df3])
 
-
-velo1=read_data_velo_feu()
-
 def date_time(day,year):
     return datetime.datetime(int(year), 7, int(day), 0, 0).strftime('%Y-%m-%d')    
 
@@ -49,5 +46,8 @@ def read_data_velo_piste():
     #set(df1['Description_Code_Banque'])
     return pd.concat(dfs)
 
-velo2=read_data_velo_piste()
-velo2.sort_values(by='Date',inplace=True)
+if __name__ == "__main__":
+
+    velo1=read_data_velo_feu()
+    velo2=read_data_velo_piste()
+    velo2.sort_values(by='Date',inplace=True)
