@@ -10,6 +10,7 @@ import datetime
 def date_time(day,month,year):
     return datetime.datetime(int(year), int(month), int(day), 0, 0).strftime('%Y-%m-%d')    
 
+#number of bikes at intersections
 def read_data_velo_feu():
 
     df1=pd.read_csv("datasets/comptages_vehicules_cyclistes_pietons_2014_2016.csv")
@@ -19,7 +20,7 @@ def read_data_velo_feu():
     #set(df1['Description_Code_Banque'])
     return pd.concat([df1,df2,df3]).reset_index()
 
-
+#number of bikes on cycling paths
 def read_data_velo_piste():
 
     mypath='/home/apkhoury/Documents/projects/DataScience_Project/datasets'
@@ -52,15 +53,24 @@ def read_localisation_velos():
     df=pd.read_csv("datasets/localisation_des_compteurs_velo.csv")
     return df
 
-
+#number of vehicules in montreal
 def read_number_vehicles():
     df=pd.read_excel('datasets/tableau.xlsx',skiprows=5,skipfooter=17)
     df= df.set_index("Type d'utilisation").T
     return df
 
+def read_air_quality_station():
+    #only 2021 and 2022 data
+    df=pd.read_csv("datasets/rsqa-indice-qualite-air-station-historique.csv")
+    return df
+
+def read_CO2():
+    #2014 to 2018 data
+    df=pd.read_csv('datasets/ghg-emissions-transport.csv')
 
 if __name__ == "__main__":
 
     velo1=read_data_velo_feu()
     velo2=read_data_velo_piste()
+    vehicule1=read_number_vehicules()
 
