@@ -7,6 +7,9 @@ from os.path import isfile, join
 import re 
 import datetime
 
+def date_time(day,month,year):
+    return datetime.datetime(int(year), int(month), int(day), 0, 0).strftime('%Y-%m-%d')    
+
 def read_data_velo_feu():
 
     df1=pd.read_csv("datasets/comptages_vehicules_cyclistes_pietons_2014_2016.csv")
@@ -14,10 +17,8 @@ def read_data_velo_feu():
     df3=pd.read_csv("datasets/comptages_vehicules_cyclistes_pietons_2020_2022.csv")
     #view different automobiles that were tracked
     #set(df1['Description_Code_Banque'])
-    return pd.concat([df1,df2,df3])
+    return pd.concat([df1,df2,df3]).reset_index()
 
-def date_time(day,year):
-    return datetime.datetime(int(year), 7, int(day), 0, 0).strftime('%Y-%m-%d')    
 
 def read_data_velo_piste():
 
@@ -30,12 +31,9 @@ def read_data_velo_piste():
     [dfs.append(pd.read_csv("datasets/"+x))for x in newlist]
     
     #adjusting month that is in french to regular dataset values
-    dfs[8]['Date'][17376:20352]=dfs[8]['Date'][17376:20352].str.extract(r'([0-9]+)(\s\w+\.)(\s2021)(.*)')[[0,2,3]].apply(lambda row : date_time(row[0],row[2]), axis = 1)+dfs[8]['Date'][17376:20352].str.extract(r'([0-9]+)(\s\w+\.)(\s2021)(.*)')[3]+":00"
-        
-    
+    dfs[8]['Date'][17376:20352]=dfs[8]['Date'][17376:20352].str.extract(r'([0-9]+)(\s\w+\.)(\s2021)(.*)')[[0,2,3]].apply(lambda row : date_time(row[0],7,row[2]), axis = 1)+dfs[8]['Date'][17376:20352].str.extract(r'([0-9]+)(\s\w+\.)(\s2021)(.*)')[3]+":00"
+           
     # setting date and time in two different columns for datasets that have them in one column only
-
-
     for x in [0,4,6,8]:
         dfs[x]['Time'] = pd.to_datetime(dfs[x]['Date']).dt.time
         dfs[x]['Date'] = pd.to_datetime(dfs[x]['Date']).dt.date
@@ -44,10 +42,25 @@ def read_data_velo_piste():
 
     #view different automobiles that were tracked
     #set(df1['Description_Code_Banque'])
-    return pd.concat(dfs)
+    df=pd.concat(dfs)
+    df.sort_values(by='Date',inplace=True)
+    df.reset_index(inplace=True)
+    return df
+
+#coordinates of velo piste compteurs
+def read_localisation_velos():
+    df=pd.read_csv("datasets/localisation_des_compteurs_velo.csv")
+    return df
+
+
+def read_number_vehicles():
+    df=pd.read_excel('datasets/tableau.xlsx',skiprows=5,skipfooter=17)
+    df= df.set_index("Type d'utilisation").T
+    return df
+
 
 if __name__ == "__main__":
 
     velo1=read_data_velo_feu()
     velo2=read_data_velo_piste()
-    velo2.sort_values(by='Date',inplace=True)
+
