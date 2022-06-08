@@ -118,6 +118,7 @@ if __name__ == "__main__":
 
     velo1df=read_data_velo_feu()
     velo2df=read_data_velo_piste()
+
     vehicle1df=read_number_vehicles()
     airdf=read_air_quality_montreal()
     
@@ -139,12 +140,64 @@ import datetime
 from mpl_toolkits.basemap import Basemap
 
 
-lat=45.5017
-lon=-73.5673
+velo2df=read_data_velo_piste()
+locdf=read_localisation_velos()
+
+"""
+=========================================
+Converting columns from velo datafile to localisation datafile
+=========================================
+"""
+#getting the columns to be consistent with the names 
+velo2df.columns=velo2df.columns.str.replace("_"," ")
+velo2df.columns=velo2df.columns.str.replace("compteur ","")
+locdf['Nom']=locdf['Nom'].str.replace("_"," ")
+locdf['Nom']=locdf['Nom'].str.replace(" \(@.*\)","")
+
+hardcode=['PierDup','Rachel / Hôtel de Ville','Pont Jacques Cartier','Totem Laurier','Christophe-Colomb','Eco-Totem - Métro Laurier']
+tohard=['Pierre-Dupuy','Rachel / HôteldeVille','Pont Jacques-Cartier','Eco-Display - Métro Laurier','Christophe-Colomb/Louvain','Eco-Display - Métro Laurier']
+
+for y in range(0,len(hardcode)):
+    velo2df.rename(columns={hardcode[y]:tohard[y]},inplace=True)
+
+column_ind=[]
+ID_found=[]
+for count,x in enumerate(velo2df.columns):
+    if np.sum(locdf['Nom']==x)>0:
+        column_ind=np.append(column_ind,count)
+        ID_found=np.append(ID_found,locdf['ID'][locdf['Nom']==x])
+
+cvals = velo2df.columns.values
+cvals[list(map(int,column_ind))]=list(map(int,ID_found))
+velo2df.columns=cvals
+
+'''
+=========================================
+Creating the map
+=========================================
+'''
+
+import plotly.express as px
+import plotly.io as pio
+import plotly.offline as pyo
+# Set notebook mode to work in offline
+pyo.init_notebook_mode()
+
+token= open("/home/apkhoury/Dropbox/python/tokens/.mapbox_token").read()
+px.set_mapbox_access_token(token)
+#MATHIAS YOU WILL HAVE TO ASK ME FOR ACCESS TOKEN FOR THIS TO WORK
 
 
-fig = plt.figure(figsize=(8, 8))
-m = Basemap(projection='lcc', resolution='c',
-            width=1E6, height=1E6, 
-            lat_0=lat, lon_0=lon,lat_1=lat+2,lon_1=lon+2)
-m.etopo(scale=0.5, alpha=0.5)
+fig = px.scatter_mapbox(locdf, lat="Latitude", lon="Longitude",
+                  size_max=15, zoom=10)
+fig.write_image('bike_location.png')
+fig.show()
+# lat=45.5017
+# lon=-73.5673
+
+
+# fig = plt.figure(figsize=(8, 8))
+# m = Basemap(projection='lcc', resolution='c',
+#             width=1E6, height=1E6, 
+#             lat_0=lat, lon_0=lon,lat_1=lat+2,lon_1=lon+2)
+# m.etopo(scale=0.5, alpha=0.5)
